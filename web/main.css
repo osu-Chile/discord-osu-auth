@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap');
+@font-face {
+    font-family: FontAwesomeExtra;
+    src: url(fa-extra.woff2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.cont{
+    animation: 0.6s ease 0s 1 slideIn;
+}
+@keyframes slideIn {
+    0% {
+      transform: translateY(0%) scale(0.9);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(-50%) scale(1.0);
+      opacity: 1;
+    }
+  }
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    scrollbar-width: thin !important;
+    scrollbar-color: #444 #ccc;
+    font-family: 'Comfortaa', cursive;
+    --accent: #ffffff;
+    --accenttrans: #ffffff;
+    --accenttranser: #ffffff;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+    background-color: #cb7373;
+}
+
+
+
+.cont{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    text-align: center;
+    
+    
+    position: absolute;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+input{
+    width: 300px;
+    margin: 10px auto 30px;
+    padding: 15px;
+    border-radius: 500px;
+    border: none;
+    font-family: Comfortaa;
+    font-size: 20px;
+    color: #fff;
+    font-weight: 900;
+    background-color: #0000;
+    
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -webkit-transition: all 0.4s cubic-bezier(0, .23, 0, .93) !important;
+    border: 2px solid white;
+}
+input:hover{
+    width: 300px;
+    margin: 10px auto 30px;
+    padding: 15px;
+    border-radius: 500px;
+    border: none;
+    font-family: Comfortaa;
+    font-size: 20px;
+    color: #cb7382;
+    font-weight: 900;
+    background-color: white;
+    -webkit-transition: all 0.2s cubic-bezier(0, .23, 0, .93) !important;
+    border: 2px solid white;
+}
+h1{
+    font-size: 40px;
+}
+
+img{
+    width: 100px;
+    padding: 15px;
+    position: absolute;
+}
+img{
+    animation: 0.6s ease 0s 1 zoom;
+}
+@keyframes zoom {
+    0% {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.0);
+      opacity: 1;
+    }
+  }
