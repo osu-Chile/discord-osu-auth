@@ -1,4 +1,1 @@
-discord==1.5.1
-mysql-connector-python==8.0.22
-requests==2.25.1
-flask==1.1.2
+
