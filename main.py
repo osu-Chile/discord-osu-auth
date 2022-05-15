@@ -26,38 +26,49 @@ bot = commands.Bot(command_prefix="bot!", intents=discord.Intents.all())
 
 
 def select_by_discord_id(discord_id: int):
-    query = f"SELECT * FROM users WHERE discordid = '{discord_id}'"
+    sql = f"SELECT * FROM users WHERE discordid = '{discord_id}'"
     db_connection = db_connect()
     cursor = db_connection.cursor()
-    cursor.execute(query)
+    cursor.execute(sql)
     db_connection.close()
-    return cursor.rowcount
+    return cursor.fetchone()
 
 
 def select_by_osu_id(osu_id: int):
-    query = f"SELECT * FROM users WHERE osuid = '{osu_id}'"
+    sql = f"SELECT * FROM users WHERE osuid = '{osu_id}'"
     db_connection = db_connect()
     cursor = db_connection.cursor()
-    cursor.execute(query)
+    cursor.execute(sql)
+    db_connection.close()
+    return cursor.fetchone()
+
+
+def insert_user(discord_name: str, osu_username: str, discord_tag: int, medals: int, osu_id: int, discord_id: int):
+    sql = "INSERT INTO users (`id`, `discordname`, `osuname`, `discordtag`, `medals`, `osuid`, `discordid`) " \
+            f"VALUES (NULL, '{discord_name}', '{osu_username}', {discord_tag}, {medals}, {osu_id}, {discord_id});"
+    print(sql)
+    db_connection = db_connect()
+    cursor = db_connection.cursor()
+    cursor.execute(sql)
+    db_connection.commit()
     db_connection.close()
     return cursor.rowcount
 
 
-def insert_user(discord_name: str, osu_username: str, discord_tag: int, medals: int, osu_id: int, discord_id: int):
-    query = "INSERT INTO users (`id`, `discordname`, `osuname`, `discordtag`, `medals`, `osuid`, `discordid`)" \
-            f" VALUES (NULL, '{discord_name}', '{osu_username}', {discord_tag}, {medals}, {osu_id}, {discord_id});"
-    print(query)
+def update_user(discord_id: int, discord_username: str, discord_discriminator: str, osu_username: str):
+    sql = f"UPDATE users SET discordname='{discord_username}', discordtag='{discord_discriminator}', " \
+          f"osuname='{osu_username}' WHERE discordid = '{discord_id}';"
     db_connection = db_connect()
     cursor = db_connection.cursor()
-    cursor.execute(query)
-    print(f"{cursor.rowcount} row(s) affected.")
+    cursor.execute(sql)
     db_connection.commit()
     db_connection.close()
+    return cursor.rowcount
 
 
 async def register(osu_id, discord_id):
-    discord_id_results = select_by_discord_id(discord_id)
-    osu_id_results = select_by_osu_id(osu_id)
+    discord_id_query = select_by_discord_id(discord_id)
+    osu_id_query = select_by_osu_id(osu_id)
 
     guild = bot.get_guild(771221822745477130)
     channel = bot.get_channel(771815223932747786)
@@ -70,10 +81,10 @@ async def register(osu_id, discord_id):
     user = bot.get_user(int(discord_id))
     member = guild.get_member(int(discord_id))
 
-    if osu_id_results == 0:
+    if osu_id_query is None:
         print("osu! id not signed up")
 
-        if discord_id_results == 0:
+        if discord_id_query is None:
             print("discord id not signed up")
             guild = bot.get_guild(771221822745477130)
 
@@ -120,14 +131,13 @@ async def register(osu_id, discord_id):
                     print(f"osuname: {osu_username}")
                     await member.edit(nick=osu_username)
                     string_bytes = user.name.encode("utf-8")
-                    base64_bytes = base64.b64encode(string_bytes)
-                    base64_string = base64_bytes.decode("ascii")
-                    discord_name = base64_string
-                    insert_user(discord_name, osu_username, user.discriminator, medals, osu_id, discord_id)
+                    discord_username = base64.b64encode(string_bytes).decode("ascii")
+                    rows = insert_user(discord_username, osu_username, user.discriminator, medals, osu_id, discord_id)
+                    print(f"{rows} row(s) affected.")
 
                     embed = discord.Embed(title="¡Solicitud aceptada!",
-                                          description="osu! link: https://osu.ppy.sh/users/" + str(
-                                              osu_id) + "\ndiscord tag: <@" + str(discord_id) + ">",
+                                          description=f"osu! link: https://osu.ppy.sh/users/{osu_id}\n"
+                                                      f"discord tag: <@{discord_id}>",
                                           color=0x00aa00)  # make green embed
                     await channel.send(embed=embed)
 
@@ -185,13 +195,9 @@ async def msg(ctx, arg):
 @bot.command()
 async def verify(ctx):
     discord_id = ctx.message.author.id
-    mydb = db_connect()
-    sql_select_query = f"SELECT * FROM users WHERE discordid = \"{discord_id}\""
-    cursor = mydb.cursor()
-    cursor.execute(sql_select_query)
-    rowcount = cursor.rowcount
+    query = select_by_discord_id(discord_id)
 
-    if rowcount == 0:
+    if query is None:
         await ctx.message.author.send(
             f"Para verificar tu identidad de osu!, haz click en el siguiente link: "
             f"https://osuchile.com/auth/?discord={discord_id}")
@@ -206,19 +212,16 @@ async def info(ctx, discord_id):
         ctx.send("y ese discord id? D:")
         return
 
-    mydb = db_connect()
-    sql_select_query = f"SELECT * FROM users WHERE discordid = \"{discord_id}\""
-    cursor = mydb.cursor()
-    cursor.execute(sql_select_query)
-    records = cursor.fetchone()
+    query = select_by_discord_id(discord_id)
 
-    if records is None:
+    if query is None:
         await ctx.send("Usuario no se encuentra en la base de datos")
         return
 
     embed = discord.Embed(title="Información usuario verificado",
-                          description=f"osu! link: https://osu.ppy.sh/users/{records[5]}"
-                                      f"\ndiscord tag: <@{records[6]}>",
+                          description=f"**osu! link:** https://osu.ppy.sh/users/{query[5]}\n"
+                                      f"**Discord tag:** <@{query[6]}>\n"
+                                      f"**Database ID:** {query[0]}",
                           color=0xaaaa00)
     await ctx.send(embed=embed)
 
@@ -227,46 +230,36 @@ async def info(ctx, discord_id):
 async def update(ctx):
     discord_id = ctx.message.author.id
     print(discord_id)
-    mydb = db_connect()
-    sql_select_query = f"SELECT * FROM users WHERE discordid = \"{discord_id}\""
-    print(sql_select_query)
-    cursor = mydb.cursor()
-    cursor.execute(sql_select_query)
-    records = cursor.fetchone()
-    # await ctx.send(str(records) + " - " + str(type(records))+ " - " + str(cursor.rowcount))
-    # await ctx.send(str(records))
-    if records is None:
-        await ctx.message.author.send('No estas verificado en el servidor. Utiliza bot!verify')
-    else:
-        osuid = records[5]
-        url = 'https://osu.ppy.sh/users/' + str(osuid)
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246'
-        }
-        cookies = requests.head(url)
-        r = requests.get(url, headers=headers,
-                         allow_redirects=True, cookies=cookies)
-        content = str(r.content)
-        print("setting username")
-        uname = re.search('<title>(.*?) ', content).group(1)
-        uname = uname.replace("&nbsp;", " ")
-        uname = uname.replace("\u2665", " ")
-        print("setting up user info with this info:")
-        print("osuname: " + uname)
-        await ctx.message.author.edit(nick=uname)
-        string_bytes = ctx.message.author.name.encode("utf-8")
-        base64_bytes = base64.b64encode(string_bytes)
-        base64_string = base64_bytes.decode("ascii")
-        dname = base64_string
-        print("discordname: " + dname + "#" + ctx.message.author.discriminator)
-        mycursor = mydb.cursor()
-        sql = f"UPDATE users SET discordname='{dname}', discordtag='{ctx.message.author.discriminator}', " \
-              f"osuname='{uname}' WHERE discordid = '{discord_id}';"
-        print(sql)
-        mycursor.execute(sql)
-        mydb.commit()
-        print(mycursor.rowcount, "record(s) affected")
-        await ctx.message.author.send(f"Tu nombre ha sido actualizado a {uname}")
+    query = select_by_discord_id(discord_id)
+
+    if query is None:
+        await ctx.message.author.send("No estas verificado en el servidor. Utiliza bot!verify para verificarte")
+        return
+
+    osu_id = query[5]
+    url = f"https://osu.ppy.sh/users/{osu_id}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/42.0.2311.135 Safari/537.36 Edge/12.246'
+    }
+    cookies = requests.head(url)
+    r = requests.get(url, headers=headers,
+                     allow_redirects=True, cookies=cookies)
+    content = str(r.content)
+    print("setting username")
+    # Gets the username from the page's title using regex.
+    osu_username = re.search('<title>(.*?) ', content).group(1)
+    osu_username = osu_username.replace("&nbsp;", " ")
+    osu_username = osu_username.replace("\u2665", " ")
+    print("setting up user info with this info:")
+    print("osu! username: " + osu_username)
+    await ctx.message.author.edit(nick=osu_username)
+    string_bytes = ctx.message.author.name.encode("utf-8")
+    discord_username = base64.b64encode(string_bytes).decode("ascii")
+    print("discordname: " + discord_username + "#" + ctx.message.author.discriminator)
+    rows = update_user(discord_id, discord_username, ctx.message.author.discriminator, osu_username)
+    print(f"{rows} row(s) affected")
+    await ctx.message.author.send(f"Tu nombre ha sido actualizado a {osu_username}")
 
 
 '''@bot.command()
@@ -286,4 +279,4 @@ def hehe():
 if __name__ == '__main__':
     t1 = threading.Thread(target=hehe)
     t1.start()
-    bot.run(' ')
+    bot.run()
