@@ -1,4 +1,5 @@
 import base64
+import os
 import threading
 
 import discord
@@ -7,17 +8,27 @@ from discord.utils import get
 from flask import Flask, Response, request
 
 import Database
+import Environment
 from RestClient import RestClient
 
 app = Flask(__name__)
 
+try:
+    Environment.read_env_variables(".env")
+except OSError:
+    print(".env file doesn't exist in the local directory. "
+          "Please create it with the corresponding variables and try again.")
+    print(OSError)
+    exit(1)
+
 bot = commands.Bot(command_prefix="bot!", intents=discord.Intents.all())
-osu_client = RestClient(0, "", "", "")
+osu_client = RestClient(int(os.environ["OSU_CLIENT_ID"]), os.environ["OSU_CLIENT_SECRET"],
+                        "https://osu.ppy.sh/oauth/token", "https://osu.ppy.sh/api/v2/")
 
 
 async def register(osu_id, discord_id):
-    discord_id_query = Database.select_by_discord_id(discord_id)
-    osu_id_query = Database.select_by_osu_id(osu_id)
+    discord_id_query_data = Database.select_by_discord_id(discord_id)
+    osu_id_query_data = Database.select_by_osu_id(osu_id)
 
     guild = bot.get_guild(771221822745477130)
     channel = bot.get_channel(771815223932747786)
@@ -30,24 +41,24 @@ async def register(osu_id, discord_id):
     user = bot.get_user(int(discord_id))
     member = guild.get_member(int(discord_id))
 
-    if osu_id_query is not None:
-        print("osu! id taken")
+    if osu_id_query_data is not None:
+        print(f"osu! ID ({osu_id}) is taken")
         await user.send(
             'ERROR : ¡La cuenta de osu! está asociada a otra persona!\n'
             'Si crees que se trata de un error, no dudes en contactar a algún administrador.')
         return
 
-    print("osu! id not signed up")
+    print(f"osu! ID ({osu_id}) not signed up")
 
-    if discord_id_query is not None:
-        print("discord id taken")
+    if discord_id_query_data is not None:
+        print(f"Discord ID ({discord_id}) is taken")
         await user.send(
             'ERROR : ¡Esta cuenta de Discord está asociada a otro usuario!\n'
             '¡La cuenta de osu! está asociada a otra persona!\n'
             'Si crees que se trata de un error, no dudes en contactar a algún administrador.')
         return
 
-    print("Discord ID not signed up")
+    print(f"Discord ID ({discord_id}) not signed up")
     guild = bot.get_guild(771221822745477130)
 
     if member is None:
@@ -56,23 +67,21 @@ async def register(osu_id, discord_id):
             'ERROR : Al parecer, no estás en nuestro servidor de Discord (https://discord.gg/osuchile)')
         return
 
-    print(f"osu! id: {osu_id}\n"
+    print(f"osu! ID: {osu_id}\n"
           f"Discord ID: {discord_id}\n"
           f"User is in the server.")
 
     await user.send("¡Autenticación exitosa! En unos segundos recibirás el rol.")
-    print("getting medal count")
+    print("Getting medal count")
     osu_user = osu_client.get_user(osu_id)
     medal_count = len(osu_user["user_achievements"])
 
     verified_role = get(guild.roles, id=771229635622207488)
 
-    print("applying roles")
     if medal_count > 1:
-        print(f"osuplayer")
+        print(f"Giving user with ID ({discord_id}) the verified role.")
         await member.add_roles(verified_role)
 
-    print("setting username")
     osu_username = osu_user["username"]
     print("Setting up user info with this info:\n"
           f"osu! ID: {osu_id}\n"
@@ -90,8 +99,6 @@ async def register(osu_id, discord_id):
                                       f"Discord tag: <@{discord_id}>",
                           color=0x00aa00)  # make green embed
     await channel.send(embed=embed)
-
-    print("quitting\n\n")
 
 
 @bot.event
@@ -127,9 +134,9 @@ async def msg(ctx, arg):
 @bot.command()
 async def verify(ctx):
     discord_id = ctx.message.author.id
-    query = Database.select_by_discord_id(discord_id)
+    query_data = Database.select_by_discord_id(discord_id)
 
-    if query is None:
+    if query_data is None:
         await ctx.message.author.send(
             f"Para verificar tu identidad de osu!, haz click en el siguiente link: "
             f"https://osuchile.com/auth/?discord={discord_id}")
@@ -144,35 +151,34 @@ async def info(ctx, discord_id):
         ctx.send("y ese discord id? D:")
         return
 
-    query = Database.select_by_discord_id(discord_id)
+    query_data = Database.select_by_discord_id(discord_id)
 
-    if query is None:
-        await ctx.send("Usuario no se encuentra en la base de datos")
+    if query_data is None:
+        await ctx.reply("Usuario no se encuentra en la base de datos")
         return
 
     embed = discord.Embed(title="Información usuario verificado",
-                          description=f"**osu! link:** https://osu.ppy.sh/users/{query[5]}\n"
-                                      f"**Discord tag:** <@{query[6]}>\n"
-                                      f"**Database ID:** {query[0]}",
+                          description=f"**osu! link:** https://osu.ppy.sh/users/{query_data[5]}\n"
+                                      f"**Discord tag:** <@{query_data[6]}>\n"
+                                      f"**Database ID:** {query_data[0]}",
                           color=0xaaaa00)
-    await ctx.send(embed=embed)
+    await ctx.reply(embed=embed)
 
 
 @bot.command()
 async def update(ctx):
     discord_id = ctx.message.author.id
     print(discord_id)
-    query = Database.select_by_discord_id(discord_id)
+    query_data = Database.select_by_discord_id(discord_id)
 
-    if query is None:
+    if query_data is None:
         await ctx.message.author.send("No estas verificado en el servidor. Utiliza bot!verify para verificarte")
         return
 
-    osu_id = query[5]
-    osu_user = osu_client.get_user(osu_id)
-    print("setting username")
-    osu_username = osu_user["username"]
-    print("setting up user info with this info:")
+    osu_id = query_data[5]
+    osu_user_data = osu_client.get_user(osu_id)
+    osu_username = osu_user_data["username"]
+    print("Setting up user info with this info:")
     print(f"osu! username: {osu_username}")
     await ctx.message.author.edit(nick=osu_username)
     string_bytes = ctx.message.author.name.encode("utf-8")
@@ -200,4 +206,4 @@ def hehe():
 if __name__ == '__main__':
     t1 = threading.Thread(target=hehe)
     t1.start()
-    bot.run()
+    bot.run(os.environ["DISCORD_TOKEN"])

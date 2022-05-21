@@ -1,12 +1,14 @@
+import os
+
 import mysql.connector
 
 
 def db_connect():
     return mysql.connector.connect(
-        host="localhost",
-        database="osudb",
-        user="",
-        password="",
+        host=os.environ["DB_HOST"],
+        database=os.environ["DB_NAME"],
+        user=os.environ["DB_USERNAME"],
+        password=os.environ["DB_PASSWORD"],
         auth_plugin='mysql_native_password'
     )
 
