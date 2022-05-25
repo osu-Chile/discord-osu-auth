@@ -4,12 +4,7 @@ import mysql.connector
 
 
 def db_connect():
-    return mysql.connector.connect(
-        host=os.environ["DB_HOST"],
-        database=os.environ["DB_NAME"],
-        user=os.environ["DB_USERNAME"],
-        password=os.environ["DB_PASSWORD"]
-    )
+    return mysql.connector.connect(option_files="db.conf")
 
 
 def select_by_discord_id(discord_id: int):
@@ -18,6 +13,7 @@ def select_by_discord_id(discord_id: int):
     cursor = db_connection.cursor()
     cursor.execute(sql)
     data = cursor.fetchone()
+    cursor.close()
     db_connection.close()
     return data
 
@@ -28,6 +24,7 @@ def select_by_osu_id(osu_id: int):
     cursor = db_connection.cursor()
     cursor.execute(sql)
     data = cursor.fetchone()
+    cursor.close()
     db_connection.close()
     return data
 
@@ -40,6 +37,7 @@ def insert_user(discord_name: str, osu_username: str, discord_tag: int, medals: 
     cursor.execute(sql)
     db_connection.commit()
     rows = cursor.rowcount
+    cursor.close()
     db_connection.close()
     return rows
 
@@ -52,5 +50,6 @@ def update_user(discord_id: int, discord_username: str, discord_tag: str, osu_us
     cursor.execute(sql)
     db_connection.commit()
     rows = cursor.rowcount
+    cursor.close()
     db_connection.close()
     return rows

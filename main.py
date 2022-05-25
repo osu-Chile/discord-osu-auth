@@ -162,7 +162,7 @@ async def info(ctx, discord_id):
                                       f"**Discord tag:** <@{query_data[6]}>\n"
                                       f"**Database ID:** {query_data[0]}",
                           color=0xaaaa00)
-    await ctx.reply(embed=embed)
+    await ctx.reply(embed=embed, mention_author=False)
 
 
 @bot.command()
