@@ -154,7 +154,7 @@ async def info(ctx, discord_id):
     query_data = Database.select_by_discord_id(discord_id)
 
     if query_data is None:
-        await ctx.reply("Usuario no se encuentra en la base de datos", )
+        await ctx.reply("Usuario no se encuentra en la base de datos", mention_author=False)
         return
 
     embed = discord.Embed(title="Información usuario verificado",
