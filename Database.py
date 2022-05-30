@@ -53,3 +53,15 @@ def update_user(discord_id: int, discord_username: str, discord_tag: str, osu_us
     cursor.close()
     db_connection.close()
     return rows
+
+
+def delete_by_user_id(discord_id: int):
+    sql = f"DELETE FROM users WHERE discord_id = {discord_id}"
+    db_connection = db_connect()
+    cursor = db_connection.cursor()
+    cursor.execute(sql)
+    db_connection.commit()
+    rows = cursor.rowcount
+    cursor.close()
+    db_connection.close()
+    return rows

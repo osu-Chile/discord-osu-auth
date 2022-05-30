@@ -154,7 +154,7 @@ async def info(ctx, discord_id):
     query_data = Database.select_by_discord_id(discord_id)
 
     if query_data is None:
-        await ctx.reply("Usuario no se encuentra en la base de datos")
+        await ctx.reply("Usuario no se encuentra en la base de datos", )
         return
 
     embed = discord.Embed(title="Información usuario verificado",
@@ -163,6 +163,22 @@ async def info(ctx, discord_id):
                                       f"**Database ID:** {query_data[0]}",
                           color=0xaaaa00)
     await ctx.reply(embed=embed, mention_author=False)
+
+
+@bot.command()
+@commands.has_role(771245699648061440)
+async def remove(ctx, discord_id):
+    if not discord_id.isnumeric():
+        ctx.send("y ese discord id? D:")
+        return
+
+    rows_affected = Database.delete_by_user_id(discord_id)
+
+    if rows_affected < 1:
+        await ctx.reply("Usuario no encontrado en la base de datos", mention_author=False)
+        return
+
+    await ctx.reply("Usuario eliminado de la base de datos.", mention_authro=False)
 
 
 @bot.command()
