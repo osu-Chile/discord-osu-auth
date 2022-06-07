@@ -178,7 +178,7 @@ async def remove(ctx, discord_id):
         await ctx.reply("Usuario no encontrado en la base de datos", mention_author=False)
         return
 
-    await ctx.reply("Usuario eliminado de la base de datos.", mention_authro=False)
+    await ctx.reply("Usuario eliminado de la base de datos.", mention_author=False)
 
 
 @bot.command()
