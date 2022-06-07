@@ -11,4 +11,4 @@ Discord bot para verificar la identidad usando su cuenta de osu!
 ## Contribuidores
 * [Hubza](https://github.com/Hubza/omh-authbot/)
 * [@fucksecurity](https://github.com/fucksecurity/)
-* [@Pancho](https://osu.ppy.sh/users/11305398)
+* [Pancho](https://osu.ppy.sh/users/11305398)
