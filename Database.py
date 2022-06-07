@@ -1,5 +1,3 @@
-import os
-
 import mysql.connector
 
 
@@ -7,8 +5,8 @@ def db_connect():
     return mysql.connector.connect(option_files="db.conf")
 
 
-def select_by_discord_id(discord_id: int):
-    sql = f"SELECT * FROM users WHERE discord_id = {discord_id}"
+def select_by_discordid(discordid: int):
+    sql = f"SELECT * FROM users WHERE discordid = {discordid}"
     db_connection = db_connect()
     cursor = db_connection.cursor()
     cursor.execute(sql)
@@ -18,8 +16,8 @@ def select_by_discord_id(discord_id: int):
     return data
 
 
-def select_by_osu_id(osu_id: int):
-    sql = f"SELECT * FROM users WHERE osu_id = {osu_id}"
+def select_by_osuid(osuid: int):
+    sql = f"SELECT * FROM users WHERE osuid = {osuid}"
     db_connection = db_connect()
     cursor = db_connection.cursor()
     cursor.execute(sql)
@@ -29,9 +27,9 @@ def select_by_osu_id(osu_id: int):
     return data
 
 
-def insert_user(discord_name: str, osu_username: str, discord_tag: int, medals: int, osu_id: int, discord_id: int):
-    sql = "INSERT INTO users (id, discord_name, osu_name, discord_tag, medals, osu_id, discord_id) " \
-          f"VALUES (NULL, '{discord_name}', '{osu_username}','{discord_tag}', {medals}, {osu_id}, {discord_id});"
+def insert_user(discordname: str, osuname: str, discordtag: int, medals: int, osuid: int, discordid: int):
+    sql = "INSERT INTO users (id, discordname, osu_name, discordtag, medals, osuid, discordid) " \
+          f"VALUES (NULL, '{discordname}', '{osuname}','{discordtag}', {medals}, {osuid}, {discordid});"
     db_connection = db_connect()
     cursor = db_connection.cursor()
     cursor.execute(sql)
@@ -42,9 +40,9 @@ def insert_user(discord_name: str, osu_username: str, discord_tag: int, medals: 
     return rows
 
 
-def update_user(discord_id: int, discord_username: str, discord_tag: str, osu_username: str):
-    sql = f"UPDATE users SET discord_name='{discord_username}', discord_tag='{discord_tag}', " \
-          f"osu_name='{osu_username}' WHERE discord_id = {discord_id};"
+def update_user(discordid: int, discordname: str, discordtag: str, osuname: str):
+    sql = f"UPDATE users SET discordname='{discordname}', discordtag='{discordtag}', " \
+          f"osu_name='{osuname}' WHERE discordid = {discordid};"
     db_connection = db_connect()
     cursor = db_connection.cursor()
     cursor.execute(sql)
@@ -55,8 +53,8 @@ def update_user(discord_id: int, discord_username: str, discord_tag: str, osu_us
     return rows
 
 
-def delete_by_user_id(discord_id: int):
-    sql = f"DELETE FROM users WHERE discord_id = {discord_id}"
+def delete_by_user_id(discordid: int):
+    sql = f"DELETE FROM users WHERE discordid = {discordid}"
     db_connection = db_connect()
     cursor = db_connection.cursor()
     cursor.execute(sql)
