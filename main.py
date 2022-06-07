@@ -27,8 +27,8 @@ osu_client = RestClient(int(os.environ["OSU_CLIENT_ID"]), os.environ["OSU_CLIENT
 
 
 async def register(osu_id, discord_id):
-    discord_id_query_data = Database.select_by_discord_id(discord_id)
-    osu_id_query_data = Database.select_by_osu_id(osu_id)
+    discord_id_query_data = Database.select_by_discordid(discord_id)
+    osu_id_query_data = Database.select_by_osuid(osu_id)
 
     guild = bot.get_guild(771221822745477130)
     channel = bot.get_channel(771815223932747786)
@@ -134,7 +134,7 @@ async def msg(ctx, arg):
 @bot.command()
 async def verify(ctx):
     discord_id = ctx.message.author.id
-    query_data = Database.select_by_discord_id(discord_id)
+    query_data = Database.select_by_discordid(discord_id)
 
     if query_data is None:
         await ctx.message.author.send(
@@ -151,7 +151,7 @@ async def info(ctx, discord_id):
         ctx.send("y ese discord id? D:")
         return
 
-    query_data = Database.select_by_discord_id(discord_id)
+    query_data = Database.select_by_discordid(discord_id)
 
     if query_data is None:
         await ctx.reply("Usuario no se encuentra en la base de datos", mention_author=False)
@@ -172,7 +172,7 @@ async def remove(ctx, discord_id):
         ctx.send("y ese discord id? D:")
         return
 
-    rows_affected = Database.delete_by_user_id(discord_id)
+    rows_affected = Database.delete_by_userid(discord_id)
 
     if rows_affected < 1:
         await ctx.reply("Usuario no encontrado en la base de datos", mention_author=False)
@@ -185,7 +185,7 @@ async def remove(ctx, discord_id):
 async def update(ctx):
     discord_id = ctx.message.author.id
     print(discord_id)
-    query_data = Database.select_by_discord_id(discord_id)
+    query_data = Database.select_by_discordid(discord_id)
 
     if query_data is None:
         await ctx.message.author.send("No estas verificado en el servidor. Utiliza bot!verify para verificarte")
@@ -203,6 +203,16 @@ async def update(ctx):
     rows = Database.update_user(discord_id, discord_username, ctx.message.author.discriminator, osu_username)
     print(f"{rows} row(s) affected")
     await ctx.message.author.send(f"Tu nombre ha sido actualizado a {osu_username}")
+
+
+@bot.event
+async def on_member_join(member):
+    registered_user = Database.select_by_discordid(member.id)
+
+    if registered_user is None:
+        return
+
+    member.edit(nick=registered_user["osu_username"])
 
 
 '''@bot.command()
