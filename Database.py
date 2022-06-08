@@ -28,7 +28,7 @@ def select_by_osuid(osuid: int):
 
 
 def insert_user(discordname: str, osuname: str, discordtag: int, medals: int, osuid: int, discordid: int):
-    sql = "INSERT INTO users (id, discordname, osu_name, discordtag, medals, osuid, discordid) " \
+    sql = "INSERT INTO users (id, discordname, osuname, discordtag, medals, osuid, discordid) " \
           f"VALUES (NULL, '{discordname}', '{osuname}','{discordtag}', {medals}, {osuid}, {discordid});"
     db_connection = db_connect()
     cursor = db_connection.cursor()
@@ -42,7 +42,7 @@ def insert_user(discordname: str, osuname: str, discordtag: int, medals: int, os
 
 def update_user(discordid: int, discordname: str, discordtag: str, osuname: str):
     sql = f"UPDATE users SET discordname='{discordname}', discordtag='{discordtag}', " \
-          f"osu_name='{osuname}' WHERE discordid = {discordid};"
+          f"osuname='{osuname}' WHERE discordid = {discordid};"
     db_connection = db_connect()
     cursor = db_connection.cursor()
     cursor.execute(sql)
