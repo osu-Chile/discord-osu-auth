@@ -6,21 +6,14 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 from flask import Flask, Response, request
+from dotenv import load_dotenv
 
 import Database
-import Environment
 from RestClient import RestClient
 
 app = Flask(__name__)
 
-try:
-    Environment.read_env_variables(".env")
-except OSError:
-    print(".env file doesn't exist in the local directory. "
-          "Please create it with the corresponding variables and try again.")
-    print(OSError)
-    exit(1)
-
+load_dotenv()
 bot = commands.Bot(command_prefix="bot!", intents=discord.Intents.all())
 osu_client = RestClient(int(os.environ["OSU_CLIENT_ID"]), os.environ["OSU_CLIENT_SECRET"],
                         "https://osu.ppy.sh/oauth/token", "https://osu.ppy.sh/api/v2/")
