@@ -27,7 +27,7 @@ def select_by_osuid(osuid: int):
     return data
 
 
-def insert_user(discordname: str, osuname: str, discordtag: int, medals: int, osuid: int, discordid: int):
+def insert_user(discordname: str, osuname: str, discordtag: str, medals: int, osuid: int, discordid: int):
     sql = "INSERT INTO users (id, discordname, osuname, discordtag, medals, osuid, discordid) " \
           f"VALUES (NULL, '{discordname}', '{osuname}','{discordtag}', {medals}, {osuid}, {discordid});"
     db_connection = db_connect()
