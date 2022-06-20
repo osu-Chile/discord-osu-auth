@@ -165,13 +165,25 @@ async def remove(ctx, discord_id):
         ctx.send("y ese discord id? D:")
         return
 
-    rows_affected = Database.delete_by_userid(discord_id)
+    query_data = Database.select_by_discordid(discord_id)
 
-    if rows_affected < 1:
+    if query_data is None:
         await ctx.reply("Usuario no encontrado en la base de datos", mention_author=False)
         return
 
-    await ctx.reply("Usuario eliminado de la base de datos.", mention_author=False)
+    embed = discord.Embed(title="Informacion usuario eliminado",
+                          description=f"**osu! link:** https://osu.ppy.sh/users/{query_data[5]}\n"
+                                      f"**Discord tag:** <@{query_data[6]}>\n"
+                                      f"**Database ID:** {query_data[0]}",
+                          color=0xff0000)
+
+    rows_affected = Database.delete_by_discordid(discord_id)
+
+    if rows_affected < 1:
+        await ctx.reply(embed=embed, mention_author=False)
+        return
+
+    await ctx.reply("No se pudo eliminar el usuario de la base de datos.", mention_author=False)
 
 
 @bot.command()
