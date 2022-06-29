@@ -162,7 +162,7 @@ async def info(ctx, discord_id):
 @commands.has_role(771245699648061440)
 async def remove(ctx, discord_id):
     if not discord_id.isnumeric():
-        ctx.send("y ese discord id? D:")
+        await ctx.send("y ese discord id? D:")
         return
 
     query_data = Database.select_by_discordid(discord_id)
