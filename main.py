@@ -179,7 +179,7 @@ async def remove(ctx, discord_id):
 
     rows_affected = Database.delete_by_discordid(discord_id)
 
-    if rows_affected < 1:
+    if rows_affected > 1:
         await ctx.reply(embed=embed, mention_author=False)
         return
 
