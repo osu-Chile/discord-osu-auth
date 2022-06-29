@@ -28,7 +28,7 @@ async def register(osu_id, discord_id):
     embed = discord.Embed(title="Nueva solicitud",
                           description=f"osu! link: https://osu.ppy.sh/users/{osu_id}\n"
                                       f"Discord tag: <@{discord_id}>",
-                          color=0xaaaa00)  # make green embed
+                          color=0xF2E15E)
 
     await channel.send(embed=embed)
     user = bot.get_user(int(discord_id))
@@ -90,7 +90,7 @@ async def register(osu_id, discord_id):
     embed = discord.Embed(title="¡Solicitud aceptada!",
                           description=f"osu! link: https://osu.ppy.sh/users/{osu_id}\n"
                                       f"Discord tag: <@{discord_id}>",
-                          color=0x00aa00)  # make green embed
+                          color=0x87F25E)  # make green embed
     await channel.send(embed=embed)
 
 
@@ -154,7 +154,7 @@ async def info(ctx, discord_id):
                           description=f"**osu! link:** https://osu.ppy.sh/users/{query_data[5]}\n"
                                       f"**Discord tag:** <@{query_data[6]}>\n"
                                       f"**Database ID:** {query_data[0]}",
-                          color=0xaaaa00)
+                          color=0x5E97F2)
     await ctx.reply(embed=embed, mention_author=False)
 
 
@@ -175,7 +175,7 @@ async def remove(ctx, discord_id):
                           description=f"**osu! link:** https://osu.ppy.sh/users/{query_data[5]}\n"
                                       f"**Discord tag:** <@{query_data[6]}>\n"
                                       f"**Database ID:** {query_data[0]}",
-                          color=0xff0000)
+                          color=0xF25E5E)
 
     rows_affected = Database.delete_by_discordid(discord_id)
 
