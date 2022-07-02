@@ -121,6 +121,7 @@ def test():
 @bot.command()
 @commands.has_role(771245699648061440)
 async def msg(ctx, arg):
+    await ctx.message.delete()
     await ctx.send(arg)
 
 
